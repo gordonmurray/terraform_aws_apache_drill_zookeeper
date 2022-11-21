@@ -1,0 +1,53 @@
+{
+    "builders": [
+        {
+            "type": "amazon-ebs",
+            "profile": "{{user `profile`}}",
+            "region": "{{user `region`}}",
+            "source_ami": "{{user `base_ami_id`}}",
+            "instance_type": "{{user `instance_type`}}",
+            "force_deregister": "true",
+            "force_delete_snapshot": "true",
+            "ssh_username": "ubuntu",
+            "ami_name": "zookeeper",
+            "subnet_id": "{{user `subnet_id`}}",
+            "ami_regions": [
+                "{{user `region`}}"
+            ],
+            "tags": {
+                "Name": "Apache Zookeeper v3.8.0"
+            }
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "file",
+            "source": "./files/zookeeper.service",
+            "destination": "/home/ubuntu/zookeeper.service"
+        },
+        {
+            "type": "file",
+            "source": "./files/zoo.cfg",
+            "destination": "/home/ubuntu/zoo.cfg"
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
+                "sudo apt update",
+                "sudo apt install default-jre -y",
+                "sudo adduser --system --home /opt/zookeeper --shell /bin/bash --uid 810  --group --disabled-login zookeeper",
+                "sudo -u zookeeper mkdir /opt/zookeeper/software",
+                "sudo -u zookeeper wget --quiet --directory-prefix /opt/zookeeper/software https://downloads.apache.org/zookeeper/zookeeper-3.8.0/apache-zookeeper-3.8.0-bin.tar.gz",
+                "sudo -u zookeeper wget --quiet --directory-prefix /opt/zookeeper/software https://downloads.apache.org/zookeeper/zookeeper-3.8.0/apache-zookeeper-3.8.0-bin.tar.gz.asc",
+                "sudo -u zookeeper mkdir /opt/zookeeper/zookeeper",
+                "sudo -u zookeeper tar --directory /opt/zookeeper/zookeeper --strip-components 1 --extract --file /opt/zookeeper/software/apache-zookeeper-3.8.0-bin.tar.gz",
+                "sudo -u zookeeper mkdir /opt/zookeeper/zookeeper/data",
+                "sudo mv /home/ubuntu/zookeeper.service /etc/systemd/system/zookeeper.service",
+                "sudo mv /home/ubuntu/zoo.cfg /opt/zookeeper/zookeeper/conf/zoo.cfg",
+                "sudo systemctl daemon-reload",
+                "sudo systemctl enable zookeeper.service"
+            ]
+        }
+    ]
+}

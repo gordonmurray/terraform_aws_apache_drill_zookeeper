@@ -1,0 +1,40 @@
+{
+    "builders": [
+        {
+            "type": "amazon-ebs",
+            "profile": "{{user `profile`}}",
+            "region": "{{user `region`}}",
+            "source_ami": "{{user `base_ami_id`}}",
+            "instance_type": "{{user `instance_type`}}",
+            "force_deregister": "true",
+            "force_delete_snapshot": "true",
+            "ssh_username": "ubuntu",
+            "ami_name": "drill",
+            "subnet_id": "{{user `subnet_id`}}",
+            "ami_regions": [
+                "{{user `region`}}"
+            ],
+            "tags": {
+                "Name": "Apache Drill v1.20.2"
+            }
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "file",
+            "source": "./files/drill-override.conf",
+            "destination": "/home/ubuntu/drill-override.conf"
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
+                "sudo apt update",
+                "sudo apt install default-jre -y",
+                "wget http://apache.mirrors.hoobly.com/drill/1.20.2/apache-drill-1.20.2.tar.gz",
+                "tar -xzf apache-drill-1.20.2.tar.gz",
+                "mv -f /home/ubuntu/drill-override.conf /home/ubuntu/apache-drill-1.20.2/conf/drill-override.conf"
+            ]
+        }
+    ]
+}

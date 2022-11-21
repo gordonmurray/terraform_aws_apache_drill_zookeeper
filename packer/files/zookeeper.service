@@ -1,0 +1,18 @@
+[Unit]
+Description=ZooKeeper Service
+After=network-online.target
+Requires=network-online.target
+
+[Service]
+Type=forking
+
+User=zookeeper
+Group=zookeeper
+
+ExecStart=/opt/zookeeper/zookeeper/bin/zkServer.sh --config /opt/zookeeper/zookeeper/conf start
+ExecStop=/opt/zookeeper/zookeeper/bin/zkServer.sh --config /opt/zookeeper/zookeeper/conf stop
+ExecReload=/opt/zookeeper/zookeeper/bin/zkServer.sh --config /opt/zookeeper/zookeeper/conf restart
+WorkingDirectory=/opt/zookeeper
+
+[Install]
+WantedBy=multi-user.target

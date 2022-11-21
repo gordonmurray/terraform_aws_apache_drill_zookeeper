@@ -1,0 +1,8 @@
+
+{
+    "base_ami_id": "ami-0f69dd1d0d03ad669",
+    "profile": "terraform_sandbox_gordon",
+    "region": "us-east-1",
+    "subnet_id": "subnet-xxxxx",
+    "instance_type": "r6g.medium"
+}
